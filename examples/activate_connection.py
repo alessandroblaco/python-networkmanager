@@ -4,14 +4,18 @@ Activate a connection by name
 
 import NetworkManager
 import sys
+import dbus.mainloop.glib
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 # Find the connection
 name = sys.argv[1]
 connections = NetworkManager.Settings.ListConnections()
-connections = dict([(x.GetSettings()['connection']['id'], x) for x in connections])
+connections = dict([(x.GetSettings()['connection']['id'], x)
+                    for x in connections])
 conn = connections[name]
 
 # Find a suitable device
+# TODO: use specific device only (e.g. wlan0)
 ctype = conn.GetSettings()['connection']['type']
 if ctype == 'vpn':
     for dev in NetworkManager.NetworkManager.GetDevices():
@@ -25,7 +29,7 @@ else:
         '802-11-wireless': NetworkManager.NM_DEVICE_TYPE_WIFI,
         '802-3-ethernet': NetworkManager.NM_DEVICE_TYPE_ETHERNET,
         'gsm': NetworkManager.NM_DEVICE_TYPE_MODEM,
-    }.get(ctype,ctype)
+    }.get(ctype, ctype)
     devices = NetworkManager.NetworkManager.GetDevices()
 
     for dev in devices:
